@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * Created by changmingxie on 10/26/15.
+ * 事务管理器 提供事务的获取、发起、提交、回滚、参与者的新增等方法
  */
 public class TransactionManager {
 
@@ -19,6 +20,7 @@ public class TransactionManager {
 
     private TransactionRepository transactionRepository;
 
+    // 当前线程事务队列
     private static final ThreadLocal<Deque<Transaction>> CURRENT = new ThreadLocal<Deque<Transaction>>();
 
     private ExecutorService executorService;
@@ -36,8 +38,12 @@ public class TransactionManager {
 
     }
 
+    /**
+     * 发起根事务
+     */
     public Transaction begin(Object uniqueIdentify) {
         Transaction transaction = new Transaction(uniqueIdentify,TransactionType.ROOT);
+        // 存储事务
         transactionRepository.create(transaction);
         registerTransaction(transaction);
         return transaction;
@@ -50,6 +56,9 @@ public class TransactionManager {
         return transaction;
     }
 
+    /**
+     * 传播发起分支事务
+     */
     public Transaction propagationNewBegin(TransactionContext transactionContext) {
 
         Transaction transaction = new Transaction(transactionContext);
@@ -59,6 +68,9 @@ public class TransactionManager {
         return transaction;
     }
 
+    /**
+     * 传播获取分支事务
+     */
     public Transaction propagationExistBegin(TransactionContext transactionContext) throws NoExistedTransactionException {
         Transaction transaction = transactionRepository.findByXid(transactionContext.getXid());
 
@@ -160,6 +172,10 @@ public class TransactionManager {
     }
 
 
+    /**
+     * 注册事务到当前线程事务队列
+     * @param transaction
+     */
     private void registerTransaction(Transaction transaction) {
 
         if (CURRENT.get() == null) {

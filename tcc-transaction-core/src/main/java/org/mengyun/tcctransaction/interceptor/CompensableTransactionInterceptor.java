@@ -19,6 +19,7 @@ import java.util.Set;
 
 /**
  * Created by changmingxie on 10/30/15.
+ * 可补偿事务拦截器
  */
 public class CompensableTransactionInterceptor {
 
@@ -40,6 +41,7 @@ public class CompensableTransactionInterceptor {
 
         CompensableMethodContext compensableMethodContext = new CompensableMethodContext(pjp);
 
+        // 当前线程是否在事务中
         boolean isTransactionActive = transactionManager.isTransactionActive();
 
         if (!TransactionUtils.isLegalTransactionContext(isTransactionActive, compensableMethodContext)) {
@@ -57,6 +59,9 @@ public class CompensableTransactionInterceptor {
     }
 
 
+    /**
+     * 发起根事务
+     */
     private Object rootMethodProceed(CompensableMethodContext compensableMethodContext) throws Throwable {
 
         Object returnValue = null;
@@ -73,13 +78,15 @@ public class CompensableTransactionInterceptor {
 
         try {
 
+            // 发起根事务
             transaction = transactionManager.begin(compensableMethodContext.getUniqueIdentity());
 
             try {
+                // 执行原方法逻辑
                 returnValue = compensableMethodContext.proceed();
             } catch (Throwable tryingException) {
 
-                if (!isDelayCancelException(tryingException, allDelayCancelExceptions)) {
+                if (!isDelayCancelException(tryingException, allDelayCancelExceptions)) { // 非延迟回滚
 
                     logger.warn(String.format("compensable transaction trying failed. transaction content:%s", JSON.toJSONString(transaction)), tryingException);
 
@@ -88,16 +95,22 @@ public class CompensableTransactionInterceptor {
 
                 throw tryingException;
             }
-
+            // 提交事务
             transactionManager.commit(asyncConfirm);
 
         } finally {
+            // 将事务从当前线程事务队列移除
             transactionManager.cleanAfterCompletion(transaction);
         }
 
         return returnValue;
     }
 
+    /**
+     * 发起分支事务
+     * 传播发起分支事务：在根事务进行confirm/cancel时，调用根事务上的参与者们提交或回滚事务时，进行远程服务方法调用的参与者，
+     * 可以通过自己的事务编号关联上传播的分支事务(两者的事务编号相等)，进行事务的提交或回滚
+     */
     private Object providerMethodProceed(CompensableMethodContext compensableMethodContext) throws Throwable {
 
         Transaction transaction = null;

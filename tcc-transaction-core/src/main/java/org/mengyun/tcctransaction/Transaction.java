@@ -21,6 +21,9 @@ public class Transaction implements Serializable {
 
     private static final long serialVersionUID = 7291423944314337931L;
 
+    /**
+     * 事务编号
+     */
     private TransactionXid xid;
 
     private TransactionStatus status;
@@ -33,10 +36,16 @@ public class Transaction implements Serializable {
 
     private Date lastUpdateTime = new Date();
 
+    /**
+     * 版本号 用于乐观锁更新事务
+     */
     private long version = 1;
 
     private List<Participant> participants = new ArrayList<Participant>();
 
+    /**
+     * 附带属性映射
+     */
     private Map<String, Object> attachments = new ConcurrentHashMap<String, Object>();
 
     public Transaction() {
@@ -62,6 +71,9 @@ public class Transaction implements Serializable {
         this.transactionType = transactionType;
     }
 
+    /**
+     * 添加参与者
+     */
     public void enlistParticipant(Participant participant) {
         participants.add(participant);
     }

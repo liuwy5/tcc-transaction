@@ -9,6 +9,9 @@ import org.mengyun.tcctransaction.interceptor.CompensableMethodContext;
  */
 public class TransactionUtils {
 
+    /**
+     * 当传播级别为 Propagation.MANDATORY 时，要求必须在事务中
+     */
     public static boolean isLegalTransactionContext(boolean isTransactionActive, CompensableMethodContext compensableMethodContext) {
 
 

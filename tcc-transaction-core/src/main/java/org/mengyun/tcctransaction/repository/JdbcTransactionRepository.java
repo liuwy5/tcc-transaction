@@ -20,8 +20,14 @@ import java.util.List;
  */
 public class JdbcTransactionRepository extends CachableTransactionRepository {
 
+    /**
+     * 领域 用于唯一标识一个资源
+     */
     private String domain;
 
+    /**
+     * 表后缀 默认存储表名为 TCC_TRANSACTION，配置表名后，为 TCC_TRANSACTION${tbSuffix}
+     */
     private String tbSuffix;
 
     private DataSource dataSource;

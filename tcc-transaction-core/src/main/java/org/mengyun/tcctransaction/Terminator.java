@@ -33,6 +33,7 @@ public class Terminator implements Serializable {
 
                 method = target.getClass().getMethod(invocationContext.getMethodName(), invocationContext.getParameterTypes());
 
+                // 设置事务上下文到方法参数
                 FactoryBuilder.factoryOf(transactionContextEditorClass).getInstance().set(transactionContext, target, method, invocationContext.getArgs());
 
                 return method.invoke(target, invocationContext.getArgs());

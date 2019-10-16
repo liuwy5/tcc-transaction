@@ -21,22 +21,25 @@ public class RecoverScheduledJob {
     public void init() {
 
         try {
+            // Quartz jobDetail
             MethodInvokingJobDetailFactoryBean jobDetail = new MethodInvokingJobDetailFactoryBean();
             jobDetail.setTargetObject(transactionRecovery);
             jobDetail.setTargetMethod("startRecover");
             jobDetail.setName("transactionRecoveryJob");
-            jobDetail.setConcurrent(false);
+            jobDetail.setConcurrent(false); // 禁止并发
             jobDetail.afterPropertiesSet();
 
+            // Quartz cronTriggerFactoryBean
             CronTriggerFactoryBean cronTrigger = new CronTriggerFactoryBean();
             cronTrigger.setBeanName("transactionRecoveryCronTrigger");
             cronTrigger.setCronExpression(transactionConfigurator.getRecoverConfig().getCronExpression());
             cronTrigger.setJobDetail(jobDetail.getObject());
             cronTrigger.afterPropertiesSet();
 
+            // 启动任务调度
             scheduler.scheduleJob(jobDetail.getObject(), cronTrigger.getObject());
 
-
+            // 启动 Quartz Scheduler
             scheduler.start();
 
         } catch (Exception e) {

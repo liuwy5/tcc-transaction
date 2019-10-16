@@ -35,6 +35,11 @@ public abstract class CachableTransactionRepository implements TransactionReposi
         return result;
     }
 
+    /**
+     * 会判断version 可能会抛出OptimisticLockException
+     * @param transaction
+     * @return
+     */
     @Override
     public int update(Transaction transaction) {
         int result = 0;
@@ -44,6 +49,10 @@ public abstract class CachableTransactionRepository implements TransactionReposi
             if (result > 0) {
                 putToCache(transaction);
             } else {
+                /**
+                 * 若更新失败 抛出OptimisticLockException异常
+                 * 两种情况导致更新失败：该事务已经被提交，被删除；乐观锁更新时，缓存的事务的版本号和存储器里的事务的版本号不同，更新失败
+                 */
                 throw new OptimisticLockException();
             }
         } finally {
@@ -68,6 +77,10 @@ public abstract class CachableTransactionRepository implements TransactionReposi
         return result;
     }
 
+    /**
+     * 优先从缓存中获取事务
+     * 缓存中事务不存在，从存储器中获取。获取到后，调用 #putToCache() 方法，添加事务到缓存中
+     */
     @Override
     public Transaction findByXid(TransactionXid transactionXid) {
         Transaction transaction = findFromCache(transactionXid);

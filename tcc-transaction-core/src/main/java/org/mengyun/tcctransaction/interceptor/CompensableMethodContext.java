@@ -84,6 +84,13 @@ public class CompensableMethodContext {
         return method;
     }
 
+    /**
+     * 计算方法类型
+     * ROOT REQUIRED且当前没有事务；REQUIRES_NEW，新建事务，事务管理器的当前线程事务队列可能会存在多个事务
+     * PROVIDER REQUIRED且当前不存在事务，并且方法参数传递了事务上下文；MANDATORY且当前不存在事务，并且方法参数传递了事务上下文
+     * NORMAL 不进行事务处理
+     * 当前不存在事务，方法参数传递了事务上下文：当跨服务远程调用时，被调用服务本身(服务提供者)不在事务中，通过传递事务上下文参数，融入当前事务
+     */
     public MethodRole getMethodRole(boolean isTransactionActive) {
         if ((propagation.equals(Propagation.REQUIRED) && !isTransactionActive && transactionContext == null) ||
                 propagation.equals(Propagation.REQUIRES_NEW)) {

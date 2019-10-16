@@ -14,14 +14,26 @@ public class Participant implements Serializable {
 
     private static final long serialVersionUID = 4127729421281425247L;
 
+    /**
+     * 参与者事务编号
+     * 通过TransactionXid.globalTransactionId属性，关联上其所属的事务
+     * 当参与者进行远程调用时，远程的分支事务的事务编号等于该参与者的事务编号。
+     * 通过事务编号的关联，confirm/cancel阶段使用参与者的事务编号和远程的分支事务进行关联，从而实现事务的提交和回滚
+     */
     private TransactionXid xid;
 
     private InvocationContext confirmInvocationContext;
 
     private InvocationContext cancelInvocationContext;
 
+    /**
+     * 执行器
+     */
     private Terminator terminator = new Terminator();
 
+    /**
+     * 事务上下文编辑
+     */
     Class<? extends TransactionContextEditor> transactionContextEditorClass;
 
     public Participant() {

@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 
 /**
  * Created by changmingxie on 11/8/15.
+ * 资源协调者拦截器
  */
 public class ResourceCoordinatorInterceptor {
 
@@ -59,6 +60,7 @@ public class ResourceCoordinatorInterceptor {
         String confirmMethodName = compensable.confirmMethod();
         String cancelMethodName = compensable.cancelMethod();
 
+        // 获取当前线程事务第一个(头部)元素
         Transaction transaction = transactionManager.getCurrentTransaction();
         TransactionXid xid = new TransactionXid(transaction.getXid().getGlobalTransactionId());
 

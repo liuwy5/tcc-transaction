@@ -40,6 +40,7 @@ public @interface Compensable {
         }
     }
 
+    //
     class DefaultTransactionContextEditor implements TransactionContextEditor {
 
         @Override
